@@ -1,0 +1,24 @@
+{
+  "entities": {
+    "Analysis": {
+      "title": "Analysis",
+      "description": "Recorded analysis results for statistics",
+      "type": "object",
+      "properties": {
+        "symptom": { "type": "string" },
+        "mainPattern": { "type": "string", "description": "The logic or pattern identified" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "hasEmail": { "type": "boolean" },
+        "email": { "type": "string" },
+        "phone": { "type": "string" }
+      },
+      "required": ["symptom", "createdAt", "hasEmail", "phone"]
+    }
+  },
+  "firestore": {
+    "/analyses/{analysisId}": {
+      "schema": "Analysis",
+      "description": "Collection of all performed analyses"
+    }
+  }
+}

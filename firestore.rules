@@ -1,0 +1,27 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function isSignedIn() { return request.auth != null; }
+
+    match /analyses/{analysisId} {
+      allow create: if isValidId(analysisId) 
+        && request.resource.data.keys().hasAll(['symptom', 'createdAt', 'hasEmail'])
+        && request.resource.data.symptom is string
+        && request.resource.data.hasEmail is bool
+        && request.resource.data.createdAt == request.time;
+      
+      // Admin can read all for stats - restricted to developer email
+      allow read: if isSignedIn() && request.auth.token.email == 'haasmont.marek@gmail.com'; 
+      
+      allow update: if isValidId(analysisId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['email', 'phone', 'hasEmail'])
+        && request.resource.data.hasEmail == true
+        && request.resource.data.phone is string && request.resource.data.phone.size() > 0;
+    }
+  }
+}
